@@ -1143,19 +1143,26 @@ class Block(PandasObject, libinternals.Block):
 
     def putmask(self, mask, new) -> list[Block]:
         """
-        putmask the data to the block; it is possible that we may create a
-        new dtype of block
+        mask : array-like of bool
+        Boolean mask indicating which positions to replace. Accepted inputs include
+        ``np.ndarray[bool]``, ``list``/``tuple`` of bool, :class:`pandas.Series` of
+        bool, :class:`pandas.arrays.BooleanArray`, or sparse boolean arrays
+        (e.g. ``SparseArray[bool]``). The mask will be validated and converted
+        internally (see :pyfunc:`pandas.core.indexing.validate_putmask` behavior)
+        to a boolean array of the appropriate shape.
 
-        Return the resulting block(s).
+        Examples
+--------
+>>> idx = pd.Index([10, 20, 30])
+>>> mask = [False, True, False]          # list of bools
+>>> idx.putmask(mask, 99)
+Index([10, 99, 30], dtype='int64')
 
-        Parameters
-        ----------
-        mask : np.ndarray[bool], SparseArray[bool], or BooleanArray
-        new : an ndarray/object
+>>> mask = pd.Series([False, True, False])
+>>> idx.putmask(mask, 0)
+Index([10, 0, 30], dtype='int64')
 
-        Returns
-        -------
-        List[Block]
+
         """
         orig_mask = mask
         values = cast(np.ndarray, self.values)
